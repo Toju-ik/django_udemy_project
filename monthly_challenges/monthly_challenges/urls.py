@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # make entire project aware of the url config for the specific app
+    path("challenges/", include("challenges.urls")) # allow for the loading of the urls defined for the challenges app for the challenges url
+
 ]
