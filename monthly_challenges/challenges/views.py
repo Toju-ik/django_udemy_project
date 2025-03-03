@@ -1,8 +1,12 @@
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
+from django.template.loader import  render_to_string
+
 
 # Create your views here. This is for the exchanging of requests and responses with the view processing the request and returning a response
+
+# dictionary
 monthly_challenges = {
     "january": "Fast for 20 days this month!",
     "february": "Read 5 books this month!",
@@ -18,17 +22,37 @@ monthly_challenges = {
     "december": "Reflect on your achievements and set new goals!"
 }
 
+def index(request):
+
+    list_items = ""
+    months = list(monthly_challenges.keys())
+
+    for month in months:
+        capitalize_month = month.capitalize()
+        month_path = reverse("monthly_challenge", args=[month])
+        list_items += f"<li><a href=\"{month_path}\">{capitalize_month}</a></li>"
+
+    response_data = f"<ul>{list_items}</ul>"
+    return HttpResponse(response_data)
+
+
 def monthly_challenge_by_number(request, month):
     months = list(monthly_challenges.keys())
-    forward_month = months[month]
-    redirect_path = reverse("monthly_challenge", args=[forward_month])
-    return HttpResponseRedirect("/challenges/" + forward_month)
+
+    if month > len(months):
+        return HttpResponseNotFound("<h1>This month is not supported!!<h1>")
+    
+    redirect_month = months[month -1]
+    redirect_path = reverse("monthly_challenge", args=[redirect_month])
+    return HttpResponseRedirect(redirect_path)
 
 def monthly_challenge(request, month):
     try:
         challenge_text = monthly_challenges[month]
-        response_data = f"<h1>{challenge_text}<h1>"
-        return HttpResponse(response_data)
+        return render(request, "challenges/challenge.html", {
+            "challenge_text": challenge_text,
+            "month": month.capitalize() + ""
+        })
     except:
         return HttpResponseNotFound("<h1>This month is not supported!!<h1>")
 
